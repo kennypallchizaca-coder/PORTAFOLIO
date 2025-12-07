@@ -34,14 +34,14 @@ const Home = () => {
       const timer = setTimeout(() => {
         setTexto((prev) => prev + current[pos])
         setPos(pos + 1)
-      }, 60)
+      }, 80) // Velocidad un poco más rápida
       return () => clearTimeout(timer)
     } else {
       const timer = setTimeout(() => {
         setTexto("")
         setPos(0)
         setIndexFrase((i) => (i + 1) % frases.length)
-      }, 1800)
+      }, 2000)
       return () => clearTimeout(timer)
     }
   }, [pos, indexFrase])
@@ -51,12 +51,12 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-transparent relative">
 
-      {/* Galaxy Background */}
+      {/* Galaxy Background - Ultra Optimizado para 60 FPS */}
       <GalaxyComponent
-        starCount1={800}
-        starCount2={250}
-        starCount3={120}
-        enableShootingStars={true}
+        starCount1={200}
+        starCount2={60}
+        starCount3={20}
+        enableShootingStars={false}
         style={{ position: 'fixed', inset: 0, zIndex: 0 }}
       />
 
@@ -161,60 +161,36 @@ const Home = () => {
           >
             <div className="relative aspect-square w-full max-w-md mx-auto lg:max-w-full">
 
-              {/* Imagen principal animada */}
+              {/* Imagen principal - Sin animación pesada */}
               <motion.div
-                animate={allowMotion ? { y: [0, -20, 0], rotate: [0, 5, 0] } : undefined}
-                transition={allowMotion ? { duration: 6, repeat: Infinity, ease: 'easeInOut' } : undefined}
+                animate={allowMotion ? { y: [0, -15, 0] } : undefined}
+                transition={allowMotion ? { duration: 8, repeat: Infinity, ease: 'linear' } : undefined}
                 className="relative z-10 flex h-full items-center justify-center"
+                style={{ willChange: 'transform' }}
               >
                 <img
                   src={headerImg}
                   alt="Developer Illustration"
-                  loading="lazy"
+                  loading="eager"
                   decoding="async"
-                  fetchPriority="high"
-                  className="w-full max-w-2xl drop-shadow-2xl"
+                  className="w-full max-w-2xl drop-shadow-xl"
                 />
               </motion.div>
 
-              {/* BURBUJAS ANIMADAS — NO QUITADAS */}
+              {/* BURBUJAS - Solo 2 con animaciones simples */}
 
               <motion.div
-                animate={allowMotion ? { y: [0, -30, 0], rotate: [0, 180, 360], scale: [1, 1.1, 1] } : undefined}
-                transition={allowMotion ? { duration: 8, repeat: Infinity, ease: 'easeInOut' } : undefined}
-                className="absolute left-4 top-12 h-20 w-20 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 opacity-60 shadow-2xl"
-                style={{ transform: 'perspective(1000px) rotateX(20deg)' }}
+                animate={allowMotion ? { y: [0, -20, 0] } : undefined}
+                transition={allowMotion ? { duration: 12, repeat: Infinity, ease: 'linear' } : undefined}
+                className="absolute left-4 top-12 h-20 w-20 rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 opacity-40 shadow-lg"
+                style={{ willChange: 'transform' }}
               ></motion.div>
 
               <motion.div
-                animate={allowMotion ? { y: [0, 40, 0], rotate: [0, -90, -180], scale: [1, 0.9, 1] } : undefined}
-                transition={allowMotion ? { duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 1 } : undefined}
-                className="absolute right-8 top-20 h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 opacity-60 shadow-2xl"
-              ></motion.div>
-
-              <motion.div
-                animate={allowMotion ? { y: [0, -25, 0], x: [0, 15, 0], rotate: [0, 45, 0] } : undefined}
-                transition={allowMotion ? { duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 0.5 } : undefined}
-                className="absolute bottom-28 left-12 h-14 w-28 rounded-3xl bg-gradient-to-r from-purple-400 to-pink-500 opacity-50 shadow-2xl"
-              ></motion.div>
-
-              <motion.div
-                animate={allowMotion ? { y: [0, 35, 0], rotate: [0, -180, -360] } : undefined}
-                transition={allowMotion ? { duration: 9, repeat: Infinity, ease: 'easeInOut', delay: 2 } : undefined}
-                className="absolute bottom-20 right-12 h-24 w-24 rounded-xl bg-gradient-to-br from-green-400 to-emerald-600 opacity-55 shadow-2xl"
-                style={{ transform: 'perspective(1000px) rotateY(30deg)' }}
-              ></motion.div>
-
-              <motion.div
-                animate={allowMotion ? { y: [0, -20, 0], scale: [1, 1.2, 1] } : undefined}
-                transition={allowMotion ? { duration: 5, repeat: Infinity, ease: 'easeInOut', delay: 1.5 } : undefined}
-                className="absolute left-1/2 top-1/3 h-10 w-10 rounded-lg bg-gradient-to-br from-yellow-400 to-amber-500 opacity-45 shadow-xl"
-              ></motion.div>
-
-              <motion.div
-                animate={allowMotion ? { y: [0, 30, 0], x: [0, -20, 0] } : undefined}
-                transition={allowMotion ? { duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 3 } : undefined}
-                className="absolute right-1/4 bottom-1/3 h-16 w-16 rounded-2xl bg-gradient-to-br from-red-400 to-rose-600 opacity-50 shadow-2xl"
+                animate={allowMotion ? { y: [0, 25, 0] } : undefined}
+                transition={allowMotion ? { duration: 14, repeat: Infinity, ease: 'linear', delay: 2 } : undefined}
+                className="absolute right-8 top-20 h-16 w-16 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 opacity-40 shadow-lg"
+                style={{ willChange: 'transform' }}
               ></motion.div>
 
             </div>
@@ -262,22 +238,20 @@ const Home = () => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                whileHover={{ scale: 1.1 }}
                 className="inline-flex items-center gap-3 transition-all duration-300"
               >
-                <FiStar className="text-primary text-2xl drop-shadow-lg" />
-                <span className="text-base font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent drop-shadow-lg">Sobre Nosotros</span>
+                <FiStar className="text-primary text-2xl" />
+                <span className="text-base font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Sobre Nosotros</span>
               </motion.div>
 
               <motion.h2
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="text-4xl font-bold md:text-5xl lg:text-6xl text-base-content drop-shadow-2xl"
-                style={{ textShadow: '0 4px 20px rgba(0,0,0,0.5)' }}
+                className="text-4xl font-bold md:text-5xl lg:text-6xl text-base-content"
               >
                 Conoce a{' '}
-                <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-gradient drop-shadow-2xl">
+                <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent animate-gradient">
                   LEXISWARE
                 </span>
               </motion.h2>
@@ -288,7 +262,6 @@ const Home = () => {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               className="text-xl leading-relaxed text-base-content md:text-2xl max-w-3xl mx-auto font-medium"
-              style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
             >
               Somos un equipo de desarrolladores apasionados que combinan creatividad,
               experiencia técnica y las últimas tecnologías para crear productos digitales
@@ -302,18 +275,15 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
-                whileHover={{ scale: 1.08, y: -12 }}
-                className="p-8 transition-all duration-500 rounded-[3rem] bg-base-100 border border-base-content/20 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+                whileHover={{ scale: 1.03 }}
+                className="p-8 transition-transform duration-200 rounded-3xl bg-base-100 border border-base-content/20 shadow-xl"
               >
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <motion.div
-                    whileHover={{ scale: 1.15, rotate: 5 }}
-                    className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center shadow-2xl transition-all"
-                  >
-                    <FiCode className="text-5xl text-white drop-shadow-lg" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold text-base-content" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Desarrollo Web</h3>
-                  <p className="text-base-content leading-relaxed font-medium" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary via-secondary to-primary flex items-center justify-center shadow-xl">
+                    <FiCode className="text-5xl text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-base-content">Desarrollo Web</h3>
+                  <p className="text-base-content leading-relaxed font-medium">
                     Aplicaciones web modernas, rápidas y escalables con las últimas tecnologías
                   </p>
                 </div>
@@ -324,18 +294,15 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                whileHover={{ scale: 1.08, y: -12 }}
-                className="p-8 transition-all duration-500 rounded-[3rem] bg-base-100 border border-base-content/20 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+                whileHover={{ scale: 1.03 }}
+                className="p-8 transition-transform duration-200 rounded-3xl bg-base-100 border border-base-content/20 shadow-xl"
               >
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <motion.div
-                    whileHover={{ scale: 1.15, rotate: -5 }}
-                    className="w-24 h-24 rounded-3xl bg-gradient-to-br from-secondary via-accent to-secondary flex items-center justify-center shadow-2xl transition-all"
-                  >
-                    <FiUsers className="text-5xl text-white drop-shadow-lg" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold text-base-content" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Equipo Experto</h3>
-                  <p className="text-base-content leading-relaxed font-medium" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-secondary via-accent to-secondary flex items-center justify-center shadow-xl">
+                    <FiUsers className="text-5xl text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-base-content">Equipo Experto</h3>
+                  <p className="text-base-content leading-relaxed font-medium">
                     Desarrolladores full-stack con experiencia en múltiples tecnologías
                   </p>
                 </div>
@@ -346,18 +313,15 @@ const Home = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                whileHover={{ scale: 1.08, y: -12 }}
-                className="p-8 transition-all duration-500 rounded-[3rem] bg-base-100 border border-base-content/20 shadow-2xl hover:shadow-[0_20px_50px_rgba(0,0,0,0.3)]"
+                whileHover={{ scale: 1.03 }}
+                className="p-8 transition-transform duration-200 rounded-3xl bg-base-100 border border-base-content/20 shadow-xl"
               >
                 <div className="flex flex-col items-center text-center space-y-4">
-                  <motion.div
-                    whileHover={{ scale: 1.15, rotate: 5 }}
-                    className="w-24 h-24 rounded-3xl bg-gradient-to-br from-accent via-primary to-accent flex items-center justify-center shadow-2xl transition-all"
-                  >
-                    <FiZap className="text-5xl text-white drop-shadow-lg" />
-                  </motion.div>
-                  <h3 className="text-2xl font-bold text-base-content" style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>Entrega Rápida</h3>
-                  <p className="text-base-content leading-relaxed font-medium" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-accent via-primary to-accent flex items-center justify-center shadow-xl">
+                    <FiZap className="text-5xl text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-base-content">Entrega Rápida</h3>
+                  <p className="text-base-content leading-relaxed font-medium">
                     Metodologías ágiles para entregas rápidas sin comprometer la calidad
                   </p>
                 </div>
