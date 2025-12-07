@@ -1,7 +1,17 @@
 /**
- * Utilidades para validación de formularios.
- * Inspirado en FormUtils de Angular para React.
- * Centraliza la lógica de validación y mensajes de error.
+ * Utilidades para validación de formularios estilo Angular para React.
+ * 
+ * Centraliza la lógica de validación de formularios con reglas reutilizables,
+ * mensajes de error personalizables y validaciones comunes (required, email, minLength, etc).
+ * 
+ * @module utils/FormUtils
+ * @author LEXISWARE - Proyecto Académico PPW
+ * @example
+ * const rules = {
+ *   email: [FormUtils.required, FormUtils.email],
+ *   password: [FormUtils.required, FormUtils.minLength(6)]
+ * };
+ * const errors = FormUtils.validateForm(formData, rules);
  */
 
 export interface FormErrors {

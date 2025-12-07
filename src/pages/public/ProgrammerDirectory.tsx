@@ -5,10 +5,12 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { listProgrammers } from '../../services/firestore'
+import { useAuth } from '../../context/AuthContext'
 import type { DocumentData } from 'firebase/firestore'
 import { motion } from 'framer-motion'
 import { FiUsers, FiEye, FiMail, FiCode, FiGithub, FiInstagram } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa'
+import LocalImage from '../../components/LocalImage'
 import fotoAlexis from '../../img/fotoalexis.jpg'
 
 // Programadores estáticos del equipo
@@ -46,15 +48,27 @@ const staticTeam = [
 ]
 
 const ProgrammerDirectory = () => {
+  const { isAuthenticated } = useAuth()
   const [programmers, setProgrammers] = useState<(DocumentData & { id: string })[]>(staticTeam)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     const load = async () => {
-      const data = await listProgrammers()
-      // Combinar programadores estáticos con los de Firebase
-      setProgrammers([...staticTeam, ...data])
-      setLoading(false)
+      console.log('👥 Cargando programadores desde Firestore (vista pública)...')
+      try {
+        const data = await listProgrammers()
+        console.log(`✅ ${data.length} programadores cargados desde Firebase:`, data)
+        // Combinar programadores estáticos con los de Firebase
+        const allProgrammers = [...staticTeam, ...data]
+        setProgrammers(allProgrammers)
+        console.log(`📋 Total de programadores (estáticos + Firebase): ${allProgrammers.length}`)
+      } catch (error) {
+        console.error('❌ Error al cargar programadores:', error)
+        // Si falla, mostrar solo los estáticos
+        setProgrammers(staticTeam)
+      } finally {
+        setLoading(false)
+      }
     }
     load()
   }, [])
@@ -115,8 +129,16 @@ const ProgrammerDirectory = () => {
                   whileHover={{ scale: 1.1, rotate: 5 }}
                   className="avatar"
                 >                  <div className="w-24 h-24 rounded-full ring-4 ring-primary/20 ring-offset-4 ring-offset-base-100 shadow-lg">
-                    {dev.photoURL ? (
+                    {dev.isStatic && dev.photoURL ? (
                       <img src={dev.photoURL} alt={dev.displayName} className="object-cover" />
+                    ) : !dev.isStatic ? (
+                      <LocalImage 
+                        uid={dev.id} 
+                        type="photo" 
+                        fallback={dev.photoURL}
+                        alt={dev.displayName}
+                        className="object-cover"
+                      />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary via-secondary to-accent text-3xl font-bold text-white">
                         <span>{dev.displayName?.charAt(0) || '?'}</span>
@@ -210,15 +232,7 @@ const ProgrammerDirectory = () => {
 
               {/* Acciones */}
               <div className="pt-2">
-                {dev.isStatic ? (
-                  <button
-                    className="btn btn-primary btn-block gap-2 shadow-lg rounded-xl"
-                    disabled
-                  >
-                    <FiUsers className="h-5 w-5" />
-                    Miembro del Equipo
-                  </button>
-                ) : (
+                {isAuthenticated && !dev.isStatic ? (
                   <Link
                     className="btn btn-primary btn-block gap-2 shadow-lg hover:shadow-xl transition-all hover:scale-105 rounded-xl"
                     to={`/portafolio/${dev.id}`}
@@ -226,6 +240,14 @@ const ProgrammerDirectory = () => {
                     <FiEye className="h-5 w-5" />
                     Ver Portafolio
                   </Link>
+                ) : (
+                  <button
+                    className="btn btn-primary btn-block gap-2 shadow-lg rounded-xl"
+                    disabled
+                  >
+                    <FiUsers className="h-5 w-5" />
+                    Miembro del Equipo
+                  </button>
                 )}
               </div>
             </div>

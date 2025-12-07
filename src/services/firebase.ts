@@ -11,7 +11,7 @@ const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyAZK6CV7xnpVYo6spCjyiQJKlYZzn1xPFE",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "react-74a51.firebaseapp.com",
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "react-74a51",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "react-74a51.firebasestorage.app",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "react-74a51.appspot.com",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "721952767951",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:721952767951:web:04bbaa0b7d9e57d48ec3f4",
 }

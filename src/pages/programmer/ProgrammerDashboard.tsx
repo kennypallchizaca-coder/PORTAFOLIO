@@ -15,7 +15,20 @@ const ProgrammerDashboard = () => {
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="card bg-base-100 shadow-md">
+          <div className="card-body">
+            <h2 className="card-title">Mi Perfil</h2>
+            <p className="text-sm text-base-content/70">
+              Edita tu foto, nombre, bio y especialidad.
+            </p>
+            <div className="card-actions justify-end">
+              <Link className="btn btn-primary btn-sm" to="/panel/perfil">
+                Editar
+              </Link>
+            </div>
+          </div>
+        </div>
         <div className="card bg-base-100 shadow-md">
           <div className="card-body">
             <h2 className="card-title">Mi portafolio</h2>
@@ -23,7 +36,7 @@ const ProgrammerDashboard = () => {
               Edita headline, skills y sobre mí.
             </p>
             <div className="card-actions justify-end">
-              <Link className="btn btn-primary btn-sm" to="/panel/portafolio">
+              <Link className="btn btn-secondary btn-sm" to="/panel/portafolio">
                 Editar
               </Link>
             </div>
@@ -36,7 +49,7 @@ const ProgrammerDashboard = () => {
               Crea proyectos académicos y laborales.
             </p>
             <div className="card-actions justify-end">
-              <Link className="btn btn-secondary btn-sm" to="/panel/proyectos">
+              <Link className="btn btn-accent btn-sm" to="/panel/proyectos">
                 Gestionar
               </Link>
             </div>
@@ -49,7 +62,7 @@ const ProgrammerDashboard = () => {
               Revisa y responde solicitudes de usuarios.
             </p>
             <div className="card-actions justify-end">
-              <Link className="btn btn-accent btn-sm" to="/panel/asesorias">
+              <Link className="btn btn-info btn-sm" to="/panel/asesorias">
                 Abrir bandeja
               </Link>
             </div>

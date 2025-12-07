@@ -131,9 +131,27 @@ const ProgrammersPage = () => {
   }
 
   const uploadPhoto = async (uid: string, file: File): Promise<string> => {
-    const storageRef = ref(storage, `programmers/${uid}/profile.jpg`)
-    await uploadBytes(storageRef, file)
-    return await getDownloadURL(storageRef)
+    try {
+      console.log('📸 Subiendo foto:', file.name, file.type, file.size, 'bytes')
+      const storageRef = ref(storage, `programmers/${uid}/profile.jpg`)
+      console.log('📁 Referencia Storage:', storageRef.fullPath)
+      
+      const snapshot = await uploadBytes(storageRef, file)
+      console.log('✅ Foto subida exitosamente:', snapshot.metadata.fullPath)
+      
+      const url = await getDownloadURL(storageRef)
+      console.log('🔗 URL obtenida:', url)
+      return url
+    } catch (error: any) {
+      console.error('❌ Error al subir foto:', error)
+      console.error('Código de error:', error.code)
+      console.error('Mensaje:', error.message)
+      
+      if (error.code === 'storage/unauthorized') {
+        throw new Error('⚠️ REGLAS DE STORAGE NO APLICADAS. Ve a Firebase Console > Storage > Rules y aplica las reglas.')
+      }
+      throw new Error(`No se pudo subir la foto: ${error.message}`)
+    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -171,10 +189,24 @@ const ProgrammersPage = () => {
       
       let photoURL = form.photoURL
 
-      // Si hay una nueva foto, subirla a Firebase Storage
+      // Guardar foto en localStorage
       if (photoFile) {
-        photoURL = await uploadPhoto(uid, photoFile)
+        const reader = new FileReader()
+        photoURL = await new Promise<string>((resolve) => {
+          reader.onloadend = () => {
+            const base64 = reader.result as string
+            localStorage.setItem(`photo_${uid}`, base64)
+            resolve(base64)
+          }
+          reader.readAsDataURL(photoFile)
+        })
       }
+
+      // Construir objeto socials solo con valores que existan
+      const socials: Record<string, string> = {}
+      if (form.github) socials.github = form.github
+      if (form.instagram) socials.instagram = form.instagram
+      if (form.whatsapp) socials.whatsapp = form.whatsapp
 
       await upsertProgrammer(uid, {
         displayName: form.displayName,
@@ -182,13 +214,9 @@ const ProgrammersPage = () => {
         specialty: form.specialty,
         bio: form.bio,
         role: 'programmer',
-        photoURL,
+        photoURL: '', // No guardamos URL en Firestore
         skills: skills,
-        socials: {
-          github: form.github || undefined,
-          instagram: form.instagram || undefined,
-          whatsapp: form.whatsapp || undefined,
-        },
+        socials,
       })
       setMessage(editingId ? '✓ Programador actualizado correctamente.' : '✓ Programador guardado correctamente.')
       setForm(initialForm)
@@ -200,8 +228,9 @@ const ProgrammersPage = () => {
       setTouched({})
       setEditingId(null)
       await loadProgrammers()
-    } catch (err) {
-      setError('No se pudo guardar. Verifica permisos y conexión.')
+    } catch (err: any) {
+      console.error('Error al guardar programador:', err)
+      setError(`Error al guardar: ${err.message || 'Verifica permisos de Firebase'}`)
     } finally {
       setLoading(false)
     }

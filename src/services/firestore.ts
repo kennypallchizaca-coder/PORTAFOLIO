@@ -1,6 +1,12 @@
 /**
  * Servicio de Firestore para CRUD de usuarios, portafolios, proyectos y asesorías.
- * Práctica: Consumo de APIs + separación de responsabilidades.
+ * 
+ * Este módulo centraliza todas las operaciones de base de datos con Firestore,
+ * implementando separación de responsabilidades y buenas prácticas.
+ * 
+ * @module services/firestore
+ * @author LEXISWARE - Proyecto Académico PPW
+ * @description Maneja las colecciones: users, portfolios, projects, schedules, advisories
  */
 import {
   collection,
@@ -75,14 +81,34 @@ export interface ScheduleSlot {
   available: boolean
 }
 
-// Guarda/actualiza perfil de programador (Admin)
+/**
+ * Guarda o actualiza el perfil de un programador en Firestore.
+ * 
+ * @param {string} uid - ID único del usuario/programador
+ * @param {ProgrammerProfile} data - Datos del perfil (displayName, email, specialty, bio, etc)
+ * @throws {Error} Si falla la operación con Firestore
+ * @example
+ * await upsertProgrammer('prog_123', { displayName: 'Juan', role: 'programmer' });
+ */
 export const upsertProgrammer = async (uid: string, data: ProgrammerProfile) => {
-  await setDoc(doc(db, collections.users, uid), {
-    ...data,
-    updatedAt: serverTimestamp(),
-  })
+  try {
+    await setDoc(doc(db, collections.users, uid), {
+      ...data,
+      updatedAt: serverTimestamp(),
+    })
+  } catch (error) {
+    console.error('Error en upsertProgrammer:', error)
+    throw error
+  }
 }
 
+/**
+ * Obtiene todos los usuarios con rol 'programmer' desde Firestore.
+ * 
+ * @returns {Promise<Array>} Lista de programadores con sus datos
+ * @example
+ * const programmers = await listProgrammers();
+ */
 export const listProgrammers = async () => {
   const q = query(
     collection(db, collections.users),
@@ -122,12 +148,13 @@ export const listProjectsByOwner = async (ownerId: string) => {
 }
 
 export const addProject = async (ownerId: string, data: Project) => {
-  return addDoc(collection(db, collections.projects), {
+  const docRef = await addDoc(collection(db, collections.projects), {
     ...data,
     ownerId,
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   })
+  return docRef
 }
 
 export const updateProject = async (projectId: string, data: Partial<Project>) =>

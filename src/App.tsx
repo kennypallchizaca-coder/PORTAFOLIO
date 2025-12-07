@@ -1,6 +1,12 @@
 /**
- * Enrutador principal de la aplicacion.
- * Practica: Routing (rutas publicas/protegidas) y layouts diferenciados.
+ * Enrutador principal de la aplicación con React Router v6.
+ * 
+ * Define rutas públicas (/, /proyectos, /programadores, /login) y protegidas
+ * (/admin/*, /panel/*) con guards de autenticación y rol.
+ * 
+ * @module App
+ * @author LEXISWARE - Proyecto Académico PPW
+ * @description Layouts: PublicLayout (navbar+footer) y DashboardLayout (sidebar)
  */
 import { Suspense, lazy } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
@@ -26,6 +32,9 @@ const ProgrammersPage = lazy(() => import('./pages/admin/ProgrammersPage'))
 const ScheduleManager = lazy(() => import('./pages/admin/ScheduleManager'))
 const PortfolioEditor = lazy(
   () => import('./pages/programmer/PortfolioEditor'),
+)
+const ProfileEditor = lazy(
+  () => import('./pages/programmer/ProfileEditor'),
 )
 const ProjectsPage = lazy(() => import('./pages/programmer/ProjectsPage'))
 const AdvisoryInbox = lazy(() => import('./pages/programmer/AdvisoryInbox'))
@@ -78,6 +87,7 @@ function App() {
           }
         >
           <Route index element={<ProgrammerDashboard />} />
+          <Route path="perfil" element={<ProfileEditor />} />
           <Route path="portafolio" element={<PortfolioEditor />} />
           <Route path="proyectos" element={<ProjectsPage />} />
           <Route path="asesorias" element={<AdvisoryInbox />} />

@@ -2,10 +2,13 @@
  * Gestión de proyectos del programador.
  * Prácticas: Formularios controlados, validación, estados de carga, consumo Firestore.
  */
-import { useEffect, useState, ChangeEvent, FormEvent } from 'react'
+import { useEffect, useState, useCallback, ChangeEvent, FormEvent } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { addProject, listProjectsByOwner, updateProject } from '../../services/firestore'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { storage } from '../../services/firebase'
 import type { DocumentData } from 'firebase/firestore'
+import { FiImage } from 'react-icons/fi'
 
 const emptyProject = {
   title: '',
@@ -15,6 +18,7 @@ const emptyProject = {
   techStack: '',
   repoUrl: '',
   demoUrl: '',
+  imageUrl: '',
 }
 
 const ProjectsPage = () => {
@@ -25,20 +29,62 @@ const ProjectsPage = () => {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState('')
 
-  const loadProjects = async () => {
+  const loadProjects = useCallback(async () => {
     if (!user?.uid) return
-    const data = await listProjectsByOwner(user.uid)
-    setProjects(data)
-  }
+    try {
+      const data = await listProjectsByOwner(user.uid)
+      setProjects(data)
+    } catch (error) {
+      console.error('Error al cargar proyectos:', error)
+      setError('No se pudieron cargar los proyectos.')
+      setProjects([])
+    }
+  }, [user?.uid])
 
   useEffect(() => {
     loadProjects()
-  }, [user?.uid])
+  }, [loadProjects])
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setImageFile(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const uploadImage = async (file: File): Promise<string> => {
+    try {
+      console.log('📸 Subiendo imagen proyecto:', file.name)
+      const timestamp = Date.now()
+      const storageRef = ref(storage, `projects/${timestamp}_${file.name}`)
+      const snapshot = await uploadBytes(storageRef, file)
+      console.log('✅ Imagen subida:', snapshot.metadata.fullPath)
+      const url = await getDownloadURL(storageRef)
+      console.log('🔗 URL:', url)
+      return url
+    } catch (error: any) {
+      console.error('❌ Error al subir imagen:', error)
+      console.error('Código de error:', error.code)
+      console.error('Mensaje:', error.message)
+      
+      if (error.code === 'storage/unauthorized') {
+        throw new Error('⚠️ REGLAS DE STORAGE NO APLICADAS. Ve a Firebase Console > Storage > Rules.')
+      }
+      throw error
+    }
   }
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -55,19 +101,45 @@ const ProjectsPage = () => {
         techStack: form.techStack.split(',').map((t) => t.trim()).filter(Boolean),
         repoUrl: form.repoUrl,
         demoUrl: form.demoUrl,
+        imageUrl: '',
       }
+
+      let projectId = editingId
+
       if (editingId) {
+        // Actualizar proyecto existente
         await updateProject(editingId, payload)
         setMessage('Proyecto actualizado.')
       } else {
+        // Crear nuevo proyecto y obtener su ID
         if (!user?.uid) throw new Error('Usuario no autenticado')
-        await addProject(user.uid, payload)
+        const docRef = await addProject(user.uid, payload)
+        projectId = docRef.id
         setMessage('Proyecto creado.')
       }
+
+      // Guardar imagen en localStorage DESPUÉS de tener el ID real
+      if (imageFile && projectId) {
+        console.log('📸 Guardando imagen en localStorage con ID:', projectId)
+        const reader = new FileReader()
+        await new Promise<void>((resolve) => {
+          reader.onloadend = () => {
+            const base64 = reader.result as string
+            localStorage.setItem(`project_img_${projectId}`, base64)
+            console.log('✅ Imagen guardada en localStorage')
+            resolve()
+          }
+          reader.readAsDataURL(imageFile)
+        })
+      }
+
       setForm(emptyProject)
       setEditingId(null)
+      setImageFile(null)
+      setImagePreview('')
       await loadProjects()
     } catch (err) {
+      console.error('Error al guardar proyecto:', err)
       setError('No se pudo guardar el proyecto.')
     } finally {
       setLoading(false)
@@ -84,7 +156,9 @@ const ProjectsPage = () => {
       techStack: p.techStack?.join(', ') || '',
       repoUrl: p.repoUrl || '',
       demoUrl: p.demoUrl || '',
+      imageUrl: p.imageUrl || '',
     })
+    setImagePreview(p.imageUrl || '')
   }
 
   return (
@@ -180,6 +254,33 @@ const ProjectsPage = () => {
                 placeholder="React, Firebase, Tailwind"
               />
             </div>
+            
+            {/* Imagen del proyecto */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Imagen del proyecto</span>
+              </label>
+              <div className="flex flex-col gap-2">
+                {imagePreview && (
+                  <div className="avatar">
+                    <div className="w-32 rounded">
+                      <img src={imagePreview} alt="Preview" />
+                    </div>
+                  </div>
+                )}
+                <label className="btn btn-outline btn-sm gap-2 w-fit">
+                  <FiImage />
+                  Seleccionar imagen
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </label>
+              </div>
+            </div>
+            
             <div className="grid gap-3 md:grid-cols-2">
               <div className="form-control">
                 <label className="label">

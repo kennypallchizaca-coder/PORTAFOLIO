@@ -151,10 +151,22 @@ const ProjectsAdmin = () => {
   }
 
   const uploadImage = async (file: File): Promise<string> => {
-    const timestamp = Date.now()
-    const storageRef = ref(storage, `projects/${timestamp}_${file.name}`)
-    await uploadBytes(storageRef, file)
-    return await getDownloadURL(storageRef)
+    try {
+      const timestamp = Date.now()
+      const storageRef = ref(storage, `projects/${timestamp}_${file.name}`)
+      const snapshot = await uploadBytes(storageRef, file)
+      const url = await getDownloadURL(storageRef)
+      return url
+    } catch (error: any) {
+      console.error('❌ Error al subir imagen:', error)
+      console.error('Código de error:', error.code)
+      console.error('Mensaje:', error.message)
+      
+      if (error.code === 'storage/unauthorized') {
+        throw new Error('⚠️ REGLAS DE STORAGE NO APLICADAS. Ve a Firebase Console > Storage > Rules y aplica las reglas.')
+      }
+      throw new Error(`No se pudo subir la imagen: ${error.message}`)
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -189,35 +201,52 @@ const ProjectsAdmin = () => {
     try {
       let imageUrl = formData.imageUrl
 
-      // Si hay una nueva imagen, subirla a Firebase Storage
+      // Guardar imagen en localStorage si hay una nueva
       if (imageFile) {
-        imageUrl = await uploadImage(imageFile)
+        const reader = new FileReader()
+        imageUrl = await new Promise<string>((resolve) => {
+          reader.onloadend = () => {
+            const base64 = reader.result as string
+            const imageId = editingId || `proj_${Date.now()}`
+            localStorage.setItem(`project_img_${imageId}`, base64)
+            resolve(base64)
+          }
+          reader.readAsDataURL(imageFile)
+        })
       }
 
-      const projectData = {
+      const projectData: any = {
         title: formData.title,
         description: formData.description,
         imageUrl,
         githubUrl: formData.githubUrl,
-        demoUrl: formData.demoUrl || '',
         technologies: technologies,
         teamMembers: teamMembers,
         category: formData.category,
         createdAt: Timestamp.now()
       }
 
+      // Solo agregar demoUrl si tiene valor
+      if (formData.demoUrl && formData.demoUrl.trim() !== '') {
+        projectData.demoUrl = formData.demoUrl
+      }
+
       if (editingId) {
+        console.log('Actualizando proyecto:', editingId, projectData)
         await updateDoc(doc(db, 'projects', editingId), projectData)
+        console.log('✓ Proyecto actualizado exitosamente')
       } else {
-        await addDoc(collection(db, 'projects'), projectData)
+        console.log('Creando nuevo proyecto:', projectData)
+        const docRef = await addDoc(collection(db, 'projects'), projectData)
+        console.log('✓ Proyecto creado con ID:', docRef.id)
       }
 
       alert('✓ Proyecto guardado correctamente.')
       resetForm()
-      fetchProjects()
-    } catch (error) {
-      console.error('Error saving project:', error)
-      alert('Error al guardar el proyecto')
+      await fetchProjects()
+    } catch (error: any) {
+      console.error('❌ Error completo al guardar proyecto:', error)
+      alert(`Error al guardar: ${error.message || 'Verifica permisos de Firebase'}`)
     } finally {
       setLoading(false)
     }

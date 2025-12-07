@@ -27,7 +27,6 @@ const LoginPage = () => {
   // Redirigir si ya está autenticado
   useEffect(() => {
     if (!authLoading && isAuthenticated && user) {
-      console.log('✅ Redirigiendo usuario autenticado:', user.email)
       const from = (location.state as any)?.from?.pathname || '/'
       navigate(from, { replace: true })
     }

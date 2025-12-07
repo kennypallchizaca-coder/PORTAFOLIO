@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import { FiGithub, FiExternalLink, FiCode } from 'react-icons/fi'
 import { collection, getDocs } from 'firebase/firestore'
 import { db } from '../../services/firebase'
+import LocalImage from '../../components/LocalImage'
 import projectImg1 from '../../img/project-img1.png'
 import projectImg2 from '../../img/project-img2.png'
 import projectImg3 from '../../img/project-img3.png'
@@ -16,9 +17,12 @@ interface Project {
   description: string
   imageUrl: string
   projectUrl?: string
+  demoUrl?: string
   githubUrl?: string
-  technologies: string[]
-  teamMembers: string[]
+  repoUrl?: string
+  technologies?: string[]
+  techStack?: string[]
+  teamMembers?: string[]
   createdAt: Date
   isStatic?: boolean
   category?: 'academico' | 'laboral'
@@ -82,7 +86,7 @@ const staticProjects: Project[] = [
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>(staticProjects)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState<'todos' | 'academico' | 'laboral'>('todos')
 
   useEffect(() => {
@@ -90,6 +94,7 @@ const Projects = () => {
   }, [])
 
   const fetchProjects = async () => {
+    setLoading(true)
     try {
       const querySnapshot = await getDocs(collection(db, 'projects'))
       const projectsData = querySnapshot.docs.map(doc => ({
@@ -102,7 +107,9 @@ const Projects = () => {
       const allProjects = [...staticProjects, ...projectsData]
       setProjects(allProjects.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
     } catch (error) {
-      console.error('Error fetching projects:', error)
+      console.error('❌ Error al cargar proyectos:', error)
+      // Si falla, mostrar solo los estáticos
+      setProjects(staticProjects)
     } finally {
       setLoading(false)
     }
@@ -198,16 +205,20 @@ const Projects = () => {
                 
                 {/* Imagen del proyecto */}
                 <div className="relative h-52 overflow-hidden">
-                  {project.imageUrl ? (
+                  {project.isStatic ? (
                     <img
                       src={project.imageUrl}
                       alt={project.title}
                       className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-                      <FiCode className="h-16 w-16 text-primary/50" />
-                    </div>
+                    <LocalImage
+                      uid={project.id}
+                      type="project"
+                      fallback={project.imageUrl || ''}
+                      alt={project.title}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
                   )}
                   {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-base-100 via-transparent to-transparent opacity-60"></div>
@@ -233,29 +244,31 @@ const Projects = () => {
 
                   {/* Tecnologías */}
                   <div className="flex flex-wrap gap-2">
-                    {project.technologies.slice(0, 3).map((tech, i) => (
+                    {(project.technologies || project.techStack || []).slice(0, 3).map((tech, i) => (
                       <span key={i} className="badge badge-sm badge-primary badge-outline">
                         {tech}
                       </span>
                     ))}
-                    {project.technologies.length > 3 && (
+                    {(project.technologies || project.techStack || []).length > 3 && (
                       <span className="badge badge-sm badge-ghost">
-                        +{project.technologies.length - 3}
+                        +{(project.technologies || project.techStack || []).length - 3}
                       </span>
                     )}
                   </div>
 
                   {/* Team members */}
-                  <div className="text-xs text-base-content/60 flex items-center gap-2">
-                    <span className="font-semibold">Por:</span>
-                    <span>{project.teamMembers.join(', ')}</span>
-                  </div>
+                  {project.teamMembers && project.teamMembers.length > 0 && (
+                    <div className="text-xs text-base-content/60 flex items-center gap-2">
+                      <span className="font-semibold">Por:</span>
+                      <span>{project.teamMembers.join(', ')}</span>
+                    </div>
+                  )}
 
                   {/* Botones */}
                   <div className="flex gap-2 pt-2">
-                    {project.projectUrl && (
+                    {(project.projectUrl || project.demoUrl) ? (
                       <a
-                        href={project.projectUrl}
+                        href={project.projectUrl || project.demoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-primary btn-sm flex-1 gap-2 rounded-xl shadow-lg hover:shadow-xl transition-all"
@@ -263,10 +276,18 @@ const Projects = () => {
                         <FiExternalLink className="h-4 w-4" />
                         Ver Proyecto
                       </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="btn btn-primary btn-sm flex-1 gap-2 rounded-xl btn-disabled"
+                      >
+                        <FiExternalLink className="h-4 w-4" />
+                        Ver Proyecto
+                      </button>
                     )}
-                    {project.githubUrl && (
+                    {(project.githubUrl || project.repoUrl) ? (
                       <a
-                        href={project.githubUrl}
+                        href={project.githubUrl || project.repoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="btn btn-ghost btn-sm btn-circle"
@@ -274,6 +295,14 @@ const Projects = () => {
                       >
                         <FiGithub className="h-5 w-5" />
                       </a>
+                    ) : (
+                      <button
+                        disabled
+                        className="btn btn-ghost btn-sm btn-circle btn-disabled"
+                        title="GitHub"
+                      >
+                        <FiGithub className="h-5 w-5" />
+                      </button>
                     )}
                   </div>
                 </div>
