@@ -21,6 +21,7 @@ const staticTeam = [
     email: 'aguamanp4@est.ups.edu.ec',
     photoURL: fotoAlexis,
     isStatic: true,
+    skills: ['JavaScript', 'React', 'Node.js', 'TypeScript', 'Firebase', 'MongoDB', 'Express'],
     socials: {
       github: 'https://github.com/kennypallchizaca-coder',
       instagram: 'https://www.instagram.com/its_alexis554/',
@@ -35,6 +36,7 @@ const staticTeam = [
     email: 'aguamanp4@est.ups.edu.ec',
     photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Daniel',
     isStatic: true,
+    skills: ['React', 'TypeScript', 'TailwindCSS', 'HTML5', 'CSS3', 'Responsive Design'],
     socials: {
       github: 'https://github.com/daniel',
       instagram: 'https://instagram.com/daniel',
@@ -139,6 +141,27 @@ const ProgrammerDirectory = () => {
               <p className="text-sm text-base-content/70 leading-relaxed text-center min-h-[4.5rem]">
                 {dev.bio || 'Desarrollador profesional con experiencia en múltiples tecnologías.'}
               </p>
+
+              {/* Habilidades */}
+              {dev.skills && dev.skills.length > 0 && (
+                <div className="space-y-2">
+                  <div className="text-xs font-semibold text-center text-base-content/60 uppercase tracking-wider">
+                    Habilidades
+                  </div>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {dev.skills.slice(0, 6).map((skill: string, i: number) => (
+                      <span key={i} className="badge badge-sm badge-primary badge-outline">
+                        {skill}
+                      </span>
+                    ))}
+                    {dev.skills.length > 6 && (
+                      <span className="badge badge-sm badge-ghost">
+                        +{dev.skills.length - 6}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Email */}
               <div className="flex items-center justify-center gap-2 text-sm text-base-content/60 p-3 rounded-xl bg-base-200/50">

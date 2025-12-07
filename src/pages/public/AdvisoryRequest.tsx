@@ -25,7 +25,8 @@ const staticProgrammers = [
     bio: 'Desarrollador full-stack especializado en React, Node.js y Firebase.',
     email: 'aguamanp4@est.ups.edu.ec',
     photoURL: fotoAlexis,
-    isStatic: true
+    isStatic: true,
+    skills: ['JavaScript', 'React', 'Node.js', 'TypeScript', 'Firebase', 'MongoDB', 'Express']
   },
   {
     id: 'daniel-static',
@@ -34,7 +35,8 @@ const staticProgrammers = [
     bio: 'Experto en desarrollo frontend con React y TypeScript.',
     email: 'aguamanp4@est.ups.edu.ec',
     photoURL: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Daniel',
-    isStatic: true
+    isStatic: true,
+    skills: ['React', 'TypeScript', 'TailwindCSS', 'HTML5', 'CSS3', 'Responsive Design']
   }
 ]
 

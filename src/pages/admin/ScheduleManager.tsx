@@ -17,13 +17,15 @@ const staticProgrammers = [
     id: 'alexis-static',
     displayName: 'Alexis',
     email: 'aguamanp4@est.ups.edu.ec',
-    specialty: 'Full Stack Developer'
+    specialty: 'Full Stack Developer',
+    skills: ['JavaScript', 'React', 'Node.js', 'TypeScript', 'Firebase', 'MongoDB', 'Express']
   },
   {
     id: 'daniel-static',
     displayName: 'Daniel',
     email: 'aguamanp4@est.ups.edu.ec',
-    specialty: 'Frontend Developer'
+    specialty: 'Frontend Developer',
+    skills: ['React', 'TypeScript', 'TailwindCSS', 'HTML5', 'CSS3', 'Responsive Design']
   }
 ]
 
