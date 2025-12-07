@@ -1,5 +1,6 @@
 /**
- * Panel de administración de proyectos
+ * Panel de administración de proyectos con formularios dinámicos
+ * Práctica: FormArray en React - agregar/eliminar tecnologías y miembros del equipo
  */
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
@@ -9,6 +10,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
 import { db, storage } from '../../services/firebase'
 import { useAuth } from '../../context/AuthContext'
 import { Navigate } from 'react-router-dom'
+import { FormUtils } from '../../utils/FormUtils'
 
 interface Project {
   id: string
@@ -19,6 +21,7 @@ interface Project {
   demoUrl?: string
   technologies: string[]
   teamMembers: string[]
+  category: 'academico' | 'laboral'
   createdAt: Date
 }
 
@@ -31,15 +34,43 @@ const ProjectsAdmin = () => {
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState('')
 
+  // Arrays dinámicos
+  const [technologies, setTechnologies] = useState<string[]>(['React', 'Firebase'])
+  const [teamMembers, setTeamMembers] = useState<string[]>(['Alexis'])
+  
+  // Controles temporales para agregar nuevos elementos
+  const [newTechnology, setNewTechnology] = useState('')
+  const [newTeamMember, setNewTeamMember] = useState('')
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     imageUrl: '',
     githubUrl: '',
     demoUrl: '',
-    technologies: '',
-    teamMembers: ''
+    category: 'academico' as 'academico' | 'laboral',
   })
+
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({})
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({})
+
+  // Reglas de validación
+  const validationRules = {
+    title: [
+      (val: string) => FormUtils.required(val),
+      (val: string) => FormUtils.minLength(val, 3)
+    ],
+    description: [
+      (val: string) => FormUtils.required(val),
+      (val: string) => FormUtils.minLength(val, 10)
+    ],
+    githubUrl: [
+      (val: string) => val && FormUtils.url(val)
+    ],
+    demoUrl: [
+      (val: string) => val && FormUtils.url(val)
+    ],
+  }
 
   useEffect(() => {
     fetchProjects()
@@ -56,6 +87,54 @@ const ProjectsAdmin = () => {
       setProjects(projectsData.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()))
     } catch (error) {
       console.error('Error fetching projects:', error)
+    }
+  }
+
+  // Agregar tecnología dinámicamente
+  const onAddTechnology = () => {
+    if (!newTechnology.trim() || newTechnology.length < 2) return
+    setTechnologies([...technologies, newTechnology.trim()])
+    setNewTechnology('')
+  }
+
+  // Eliminar tecnología
+  const onDeleteTechnology = (index: number) => {
+    setTechnologies(technologies.filter((_, i) => i !== index))
+  }
+
+  // Agregar miembro del equipo dinámicamente
+  const onAddTeamMember = () => {
+    if (!newTeamMember.trim() || newTeamMember.length < 3) return
+    setTeamMembers([...teamMembers, newTeamMember.trim()])
+    setNewTeamMember('')
+  }
+
+  // Eliminar miembro del equipo
+  const onDeleteTeamMember = (index: number) => {
+    setTeamMembers(teamMembers.filter((_, i) => i !== index))
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    
+    // Validar en tiempo real si ya fue tocado
+    if (touched[name]) {
+      const fieldRules = validationRules[name as keyof typeof validationRules]
+      if (fieldRules) {
+        const error = FormUtils.validate(value, fieldRules)
+        setFormErrors(prev => ({ ...prev, [name]: error || '' }))
+      }
+    }
+  }
+
+  const handleBlur = (fieldName: string) => {
+    setTouched(prev => ({ ...prev, [fieldName]: true }))
+    
+    const fieldRules = validationRules[fieldName as keyof typeof validationRules]
+    if (fieldRules) {
+      const error = FormUtils.validate(formData[fieldName as keyof typeof formData], fieldRules)
+      setFormErrors(prev => ({ ...prev, [fieldName]: error || '' }))
     }
   }
 
@@ -80,6 +159,31 @@ const ProjectsAdmin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Marcar todos los campos como tocados
+    const allTouched = Object.keys(validationRules).reduce((acc, key) => {
+      acc[key] = true
+      return acc
+    }, {} as { [key: string]: boolean })
+    setTouched(allTouched)
+    
+    // Validar formulario
+    const errors = FormUtils.validateForm(formData, validationRules)
+    setFormErrors(errors)
+    
+    // Validar arrays dinámicos
+    if (technologies.length < 1) {
+      errors['technologies'] = 'Debe tener al menos 1 tecnología'
+    }
+    if (teamMembers.length < 1) {
+      errors['teamMembers'] = 'Debe tener al menos 1 miembro del equipo'
+    }
+    
+    if (FormUtils.hasErrors(errors)) {
+      alert('Por favor corrige los errores en el formulario.')
+      return
+    }
+    
     setLoading(true)
 
     try {
@@ -96,8 +200,9 @@ const ProjectsAdmin = () => {
         imageUrl,
         githubUrl: formData.githubUrl,
         demoUrl: formData.demoUrl || '',
-        technologies: formData.technologies.split(',').map(t => t.trim()).filter(Boolean),
-        teamMembers: formData.teamMembers.split(',').map(m => m.trim()).filter(Boolean),
+        technologies: technologies,
+        teamMembers: teamMembers,
+        category: formData.category,
         createdAt: Timestamp.now()
       }
 
@@ -107,6 +212,7 @@ const ProjectsAdmin = () => {
         await addDoc(collection(db, 'projects'), projectData)
       }
 
+      alert('✓ Proyecto guardado correctamente.')
       resetForm()
       fetchProjects()
     } catch (error) {
@@ -124,9 +230,10 @@ const ProjectsAdmin = () => {
       imageUrl: project.imageUrl,
       githubUrl: project.githubUrl,
       demoUrl: project.demoUrl || '',
-      technologies: project.technologies.join(', '),
-      teamMembers: project.teamMembers.join(', ')
+      category: project.category || 'academico',
     })
+    setTechnologies(project.technologies)
+    setTeamMembers(project.teamMembers)
     setEditingId(project.id)
     setShowForm(true)
   }
@@ -150,13 +257,18 @@ const ProjectsAdmin = () => {
       imageUrl: '',
       githubUrl: '',
       demoUrl: '',
-      technologies: '',
-      teamMembers: ''
+      category: 'academico',
     })
+    setTechnologies(['React', 'Firebase'])
+    setTeamMembers(['Alexis'])
+    setNewTechnology('')
+    setNewTeamMember('')
     setImageFile(null)
     setImagePreview('')
     setEditingId(null)
     setShowForm(false)
+    setFormErrors({})
+    setTouched({})
   }
 
   if (!user) {
@@ -253,6 +365,22 @@ const ProjectsAdmin = () => {
                   />
                 </div>
 
+                {/* Campo de categoría */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Categoría del Proyecto *</span>
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value as 'academico' | 'laboral' })}
+                    className="select select-bordered"
+                    required
+                  >
+                    <option value="academico">Académico</option>
+                    <option value="laboral">Laboral</option>
+                  </select>
+                </div>
+
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="form-control">
                     <label className="label">
@@ -304,33 +432,125 @@ const ProjectsAdmin = () => {
                   </div>
                 </div>
 
-                <div className="grid gap-4 md:grid-cols-2">
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Tecnologías (separadas por coma) *</span>
-                    </label>
+                {/* FORMULARIOS DINÁMICOS - Tecnologías */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-bold">Tecnologías *</span>
+                  </label>
+                  
+                  {/* Input para agregar nueva tecnología */}
+                  <div className="join mb-3">
                     <input
                       type="text"
-                      value={formData.technologies}
-                      onChange={(e) => setFormData({ ...formData, technologies: e.target.value })}
-                      className="input input-bordered"
-                      placeholder="React, TypeScript, Firebase"
-                      required
+                      value={newTechnology}
+                      onChange={(e) => setNewTechnology(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          onAddTechnology()
+                        }
+                      }}
+                      className="input input-bordered join-item flex-1"
+                      placeholder="Agregar tecnología (ej: React, Node.js)"
                     />
+                    <button
+                      type="button"
+                      onClick={onAddTechnology}
+                      className="btn btn-primary join-item"
+                    >
+                      <FiPlus /> Agregar
+                    </button>
                   </div>
 
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Miembros del equipo (separados por coma) *</span>
-                    </label>
+                  {/* Lista dinámica de tecnologías */}
+                  <div className="space-y-2">
+                    {technologies.map((tech, index) => (
+                      <div key={index} className="join w-full">
+                        <input
+                          type="text"
+                          value={tech}
+                          onChange={(e) => {
+                            const newTechs = [...technologies]
+                            newTechs[index] = e.target.value
+                            setTechnologies(newTechs)
+                          }}
+                          className="input input-bordered join-item flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => onDeleteTechnology(index)}
+                          className="btn btn-error join-item"
+                        >
+                          <FiTrash2 /> Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    {technologies.length === 0 && (
+                      <div className="alert alert-warning">
+                        Debe agregar al menos 1 tecnología
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* FORMULARIOS DINÁMICOS - Miembros del equipo */}
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text font-bold">Miembros del Equipo *</span>
+                  </label>
+                  
+                  {/* Input para agregar nuevo miembro */}
+                  <div className="join mb-3">
                     <input
                       type="text"
-                      value={formData.teamMembers}
-                      onChange={(e) => setFormData({ ...formData, teamMembers: e.target.value })}
-                      className="input input-bordered"
-                      placeholder="Kenny, Alexis, Daniel"
-                      required
+                      value={newTeamMember}
+                      onChange={(e) => setNewTeamMember(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          onAddTeamMember()
+                        }
+                      }}
+                      className="input input-bordered join-item flex-1"
+                      placeholder="Agregar miembro del equipo"
                     />
+                    <button
+                      type="button"
+                      onClick={onAddTeamMember}
+                      className="btn btn-primary join-item"
+                    >
+                      <FiPlus /> Agregar
+                    </button>
+                  </div>
+
+                  {/* Lista dinámica de miembros */}
+                  <div className="space-y-2">
+                    {teamMembers.map((member, index) => (
+                      <div key={index} className="join w-full">
+                        <input
+                          type="text"
+                          value={member}
+                          onChange={(e) => {
+                            const newMembers = [...teamMembers]
+                            newMembers[index] = e.target.value
+                            setTeamMembers(newMembers)
+                          }}
+                          className="input input-bordered join-item flex-1"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => onDeleteTeamMember(index)}
+                          className="btn btn-error join-item"
+                        >
+                          <FiTrash2 /> Eliminar
+                        </button>
+                      </div>
+                    ))}
+                    {teamMembers.length === 0 && (
+                      <div className="alert alert-warning">
+                        Debe agregar al menos 1 miembro del equipo
+                      </div>
+                    )}
                   </div>
                 </div>
 

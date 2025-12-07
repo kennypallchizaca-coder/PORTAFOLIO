@@ -33,6 +33,7 @@ export interface ProgrammerProfile {
   bio?: string
   role: Role
   photoURL?: string
+  skills?: string[]
   socials?: {
     github?: string
     instagram?: string

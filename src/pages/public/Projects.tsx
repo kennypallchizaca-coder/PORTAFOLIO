@@ -21,6 +21,7 @@ interface Project {
   teamMembers: string[]
   createdAt: Date
   isStatic?: boolean
+  category?: 'academico' | 'laboral'
 }
 
 // Proyectos estáticos del equipo
@@ -35,7 +36,8 @@ const staticProjects: Project[] = [
     technologies: ['React', 'Node.js', 'PostgreSQL', 'TypeScript'],
     teamMembers: ['Alexis', 'Daniel'],
     createdAt: new Date('2024-01-15'),
-    isStatic: true
+    isStatic: true,
+    category: 'laboral'
   },
   {
     id: 'project-2',
@@ -47,7 +49,8 @@ const staticProjects: Project[] = [
     technologies: ['Next.js', 'Stripe', 'MongoDB', 'TailwindCSS'],
     teamMembers: ['Alexis'],
     createdAt: new Date('2024-03-20'),
-    isStatic: true
+    isStatic: true,
+    category: 'laboral'
   },
   {
     id: 'project-3',
@@ -59,7 +62,8 @@ const staticProjects: Project[] = [
     technologies: ['React', 'Firebase', 'Material-UI'],
     teamMembers: ['Daniel'],
     createdAt: new Date('2024-05-10'),
-    isStatic: true
+    isStatic: true,
+    category: 'academico'
   },
   {
     id: 'project-4',
@@ -70,14 +74,16 @@ const staticProjects: Project[] = [
     githubUrl: 'https://github.com/lexisware/analytics-dashboard',
     technologies: ['Vue.js', 'Chart.js', 'Express', 'MySQL'],
     teamMembers: ['Alexis', 'Daniel'],
-    createdAt: new Date('2024-07-25'),
-    isStatic: true
+    createdAt: new Date('2024-06-15'),
+    isStatic: true,
+    category: 'academico'
   }
 ]
 
 const Projects = () => {
   const [projects, setProjects] = useState<Project[]>(staticProjects)
   const [loading, setLoading] = useState(false)
+  const [filter, setFilter] = useState<'todos' | 'academico' | 'laboral'>('todos')
 
   useEffect(() => {
     fetchProjects()
@@ -134,23 +140,50 @@ const Projects = () => {
 
       {/* Projects Grid */}
       <section className="container mx-auto px-4 py-16">
+        {/* Filtros */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-wrap justify-center gap-3 mb-12"
+        >
+          <button
+            onClick={() => setFilter('todos')}
+            className={`btn ${filter === 'todos' ? 'btn-primary' : 'btn-outline'}`}
+          >
+            Todos los Proyectos
+          </button>
+          <button
+            onClick={() => setFilter('academico')}
+            className={`btn ${filter === 'academico' ? 'btn-secondary' : 'btn-outline'}`}
+          >
+            <FiCode className="mr-2" />
+            Proyectos Académicos
+          </button>
+          <button
+            onClick={() => setFilter('laboral')}
+            className={`btn ${filter === 'laboral' ? 'btn-accent' : 'btn-outline'}`}
+          >
+            Proyectos Laborales
+          </button>
+        </motion.div>
+
         {loading ? (
           <div className="flex justify-center py-20">
             <span className="loading loading-spinner loading-lg text-primary"></span>
           </div>
-        ) : projects.length === 0 ? (
+        ) : projects.filter(p => filter === 'todos' || (p as any).category === filter).length === 0 ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="text-center py-20"
           >
             <FiCode className="mx-auto h-16 w-16 text-base-content/30 mb-4" />
-            <h3 className="text-2xl font-bold mb-2">No hay proyectos aún</h3>
-            <p className="text-base-content/70">Los proyectos aparecerán aquí pronto</p>
+            <h3 className="text-2xl font-bold mb-2">No hay proyectos en esta categoría</h3>
+            <p className="text-base-content/70">Prueba con otro filtro</p>
           </motion.div>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-items-center max-w-7xl mx-auto">
-            {projects.map((project, idx) => (
+            {projects.filter(p => filter === 'todos' || (p as any).category === filter).map((project, idx) => (
               <motion.div
                 key={project.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -178,6 +211,15 @@ const Projects = () => {
                   )}
                   {/* Overlay gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-base-100 via-transparent to-transparent opacity-60"></div>
+                  
+                  {/* Badge de categoría */}
+                  {project.category && (
+                    <div className="absolute top-4 right-4">
+                      <span className={`badge ${project.category === 'academico' ? 'badge-secondary' : 'badge-accent'} badge-lg`}>
+                        {project.category === 'academico' ? 'Académico' : 'Laboral'}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="relative p-6 space-y-4">
