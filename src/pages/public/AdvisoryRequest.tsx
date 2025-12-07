@@ -1,0 +1,171 @@
+/**
+ * Formulario público para solicitar asesoría.
+ * Prácticas: Formularios controlados, validación básica y feedback de errores.
+ */
+import { useEffect, useState, ChangeEvent, FormEvent } from 'react'
+import { addAdvisoryRequest, listProgrammers } from '../../services/firestore'
+import type { DocumentData } from 'firebase/firestore'
+
+const initialForm = {
+  programmerId: '',
+  requesterName: '',
+  requesterEmail: '',
+  date: '',
+  time: '',
+  note: '',
+}
+
+const AdvisoryRequest = () => {
+  const [form, setForm] = useState(initialForm)
+  const [loading, setLoading] = useState(false)
+  const [programmers, setProgrammers] = useState<(DocumentData & { id: string })[]>([])
+  const [message, setMessage] = useState('')
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    listProgrammers().then(setProgrammers)
+  }, [])
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const isValid = () =>
+    form.programmerId && form.requesterName && form.requesterEmail && form.date && form.time
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!isValid()) {
+      setError('Completa los campos obligatorios.')
+      return
+    }
+    setLoading(true)
+    setError('')
+    setMessage('')
+    try {
+      await addAdvisoryRequest({
+        programmerId: form.programmerId,
+        requesterName: form.requesterName,
+        requesterEmail: form.requesterEmail,
+        slot: { date: form.date, time: form.time },
+        note: form.note,
+      })
+      setMessage('Solicitud enviada. Recibirás respuesta del programador.')
+      setForm(initialForm)
+    } catch (err) {
+      setError('No se pudo enviar la solicitud. Intenta nuevamente.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="max-w-2xl">
+      <h1 className="text-3xl font-bold">Agendar Asesoría</h1>
+      <p className="text-base-content/70 mb-6">
+        Selecciona programador, fecha y hora. El programador aprobará o rechazará tu solicitud.
+      </p>
+      <form onSubmit={handleSubmit} className="card bg-base-100 shadow-lg">
+        <div className="card-body space-y-4">
+          {message && <div className="alert alert-success text-sm">{message}</div>}
+          {error && <div className="alert alert-error text-sm">{error}</div>}
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Programador *</span>
+            </label>
+            <select
+              name="programmerId"
+              value={form.programmerId}
+              onChange={handleChange}
+              className="select select-bordered"
+              required
+            >
+              <option value="">Selecciona</option>
+              {programmers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.displayName} · {p.specialty}
+                </option>
+              ))}
+            </select>
+            <span className="label-text-alt text-base-content/60">
+              Lista cargada desde Firestore (rol programmer).
+            </span>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Tu nombre *</span>
+              </label>
+              <input
+                name="requesterName"
+                value={form.requesterName}
+                onChange={handleChange}
+                className="input input-bordered"
+                placeholder="Nombre de quien solicita"
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Correo *</span>
+              </label>
+              <input
+                type="email"
+                name="requesterEmail"
+                value={form.requesterEmail}
+                onChange={handleChange}
+                className="input input-bordered"
+                placeholder="correo@ejemplo.com"
+              />
+            </div>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Fecha *</span>
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+                className="input input-bordered"
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Hora *</span>
+              </label>
+              <input
+                type="time"
+                name="time"
+                value={form.time}
+                onChange={handleChange}
+                className="input input-bordered"
+              />
+            </div>
+          </div>
+          <div className="form-control">
+            <label className="label">
+              <span className="label-text">Motivo / nota</span>
+            </label>
+            <textarea
+              name="note"
+              value={form.note}
+              onChange={handleChange}
+              className="textarea textarea-bordered"
+              rows={3}
+            />
+          </div>
+          <div className="card-actions justify-end">
+            <button className="btn btn-primary" type="submit" disabled={loading}>
+              {loading ? 'Enviando...' : 'Enviar solicitud'}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+export default AdvisoryRequest

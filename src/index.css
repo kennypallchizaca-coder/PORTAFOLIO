@@ -1,0 +1,118 @@
+/* Práctica: Instalación y estilos base con Tailwind + DaisyUI */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Estilos base mejorados */
+@layer base {
+  html {
+    @apply scroll-smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply antialiased;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Utilidades personalizadas */
+@layer utilities {
+  /* Aceleración de hardware para animaciones */
+  .gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  .smooth-transition {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Animación de gradiente */
+  @keyframes gradient {
+    0%, 100% {
+      background-size: 200% 200%;
+      background-position: left center;
+    }
+    50% {
+      background-size: 200% 200%;
+      background-position: right center;
+    }
+  }
+
+  .animate-gradient {
+    background-size: 200% 200%;
+    animation: gradient 3s ease infinite;
+  }
+
+  /* Scrollbar personalizado */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-base-200;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-base-content/20 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-base-content/30;
+  }
+
+  /* Text gradient utility */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent;
+  }
+
+  /* Glass effect */
+  .glass-effect {
+    @apply bg-base-100/80 backdrop-blur-lg;
+  }
+
+  /* Hover glow effect */
+  .hover-glow {
+    @apply transition-all hover:shadow-lg hover:shadow-primary/20;
+  }
+}
+
+/* Componentes personalizados */
+@layer components {
+  /* Card mejorada */
+  .card-enhanced {
+    @apply card bg-base-100 shadow-lg transition-all hover:-translate-y-1 hover:shadow-xl;
+  }
+
+  /* Button con efecto gradient */
+  .btn-gradient {
+    @apply btn bg-gradient-to-r from-primary to-secondary border-none text-white hover:scale-105;
+  }
+
+  /* Badge con animación de pulso */
+  .badge-live {
+    @apply badge badge-primary animate-pulse;
+  }
+}
+
+
+/* Práctica: Fuente y fondo global para UX consistente */
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  color: #0f172a;
+  background-color: #f8fafc;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: inherit;
+}
