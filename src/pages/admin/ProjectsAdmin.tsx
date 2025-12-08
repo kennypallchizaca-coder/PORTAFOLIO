@@ -640,7 +640,7 @@ const ProjectsAdmin = () => {
                   {project.description}
                 </p>
                 <div className="flex flex-wrap gap-1 mt-2">
-                  {project.technologies.slice(0, 3).map((tech, i) => (
+                  {(project.technologies || []).slice(0, 3).map((tech, i) => (
                     <span key={i} className="badge badge-sm badge-primary badge-outline">
                       {tech}
                     </span>

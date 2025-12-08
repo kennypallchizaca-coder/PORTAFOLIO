@@ -156,7 +156,7 @@ firebase deploy
 Proyecto académico desarrollado para la Universidad Nacional de Loja - Carrera de Computación.
 
 **Asignatura:** Programación y Plataformas Web  
-**Docente:** Ing. Cristian Timbi Sisalima  
+**Docente:** Ing. Pablo Torres
 **Período:** Octubre 2025 - Febrero 2026
 
 ## 👥 Autores
