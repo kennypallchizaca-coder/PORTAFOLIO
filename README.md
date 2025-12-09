@@ -161,8 +161,8 @@ Proyecto académico desarrollado para la Universidad Nacional de Loja - Carrera 
 
 ## 👥 Autores
 
-- **Kenny Pallchizaca** - [@kennypallchizaca-coder](https://github.com/kennypallchizaca-coder)
-- **[Nombre Compañero]** - Desarrollo colaborativo
+- **Alex Guaaman** - [@kennypallchizaca-coder](https://github.com/kennypallchizaca-coder)
+- **Daniel Guanga** - Desarrollo colaborativo
 
 ---
 
