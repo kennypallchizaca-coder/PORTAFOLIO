@@ -69,19 +69,23 @@ const NavBar = () => {
                 <FiCode /> Proyectos
               </Link>
             </li>
-            <li className="menu-title">
-              <span>Asesorías</span>
-            </li>
-            <li>
-              <Link to="/agendar-asesoria">
-                Agendar
-              </Link>
-            </li>
-            <li>
-              <Link to="/mis-solicitudes">
-                Mis Solicitudes
-              </Link>
-            </li>
+              {isAuthenticated && role === 'external' && (
+                <>
+                  <li className="menu-title">
+                    <span>Asesorías</span>
+                  </li>
+                  <li>
+                    <Link to="/agendar-asesoria">
+                      Agendar
+                    </Link>
+                  </li>
+                  <li>
+                    <Link to="/mis-solicitudes">
+                      Mis Solicitudes
+                    </Link>
+                  </li>
+                </>
+              )}
           </ul>
         </div>
         <div onClick={handleLogoClick} className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
@@ -107,15 +111,17 @@ const NavBar = () => {
               <FiCode /> Proyectos
             </Link>
           </li>
-          <li>
-            <details>
-              <summary>Asesorías</summary>
-              <ul className="p-2 bg-base-100 rounded-box w-48">
-                <li><Link to="/agendar-asesoria">Agendar</Link></li>
-                <li><Link to="/mis-solicitudes">Mis Solicitudes</Link></li>
-              </ul>
-            </details>
-          </li>
+            {isAuthenticated && role === 'external' && (
+              <li>
+                <details>
+                  <summary>Asesorías</summary>
+                  <ul className="p-2 bg-base-100 rounded-box w-48">
+                    <li><Link to="/agendar-asesoria">Agendar</Link></li>
+                    <li><Link to="/mis-solicitudes">Mis Solicitudes</Link></li>
+                  </ul>
+                </details>
+              </li>
+            )}
         </ul>
       </div>
 

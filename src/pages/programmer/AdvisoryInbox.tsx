@@ -14,6 +14,11 @@ const AdvisoryInbox = () => {
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<'todas' | 'pendiente' | 'aprobada' | 'rechazada'>('pendiente')
 
+    // Limpia la lista visual de asesorías
+    const clearHistory = () => {
+      setItems([])
+    }
+
   const load = async () => {
     if (!user?.uid) return
     setLoading(true)
@@ -54,9 +59,14 @@ const AdvisoryInbox = () => {
             Revisa solicitudes y aprueba o rechaza con feedback.
           </p>
         </div>
-        <button className="btn btn-outline btn-sm" onClick={load} disabled={loading}>
-          Recargar
-        </button>
+        <div className="flex gap-2">
+          <button className="btn btn-outline btn-sm" onClick={load} disabled={loading}>
+            Recargar
+          </button>
+          <button className="btn btn-outline btn-sm" onClick={clearHistory} disabled={loading}>
+            Limpiar Historial
+          </button>
+        </div>
       </div>
       
       <div className="flex gap-2">
@@ -84,7 +94,12 @@ const AdvisoryInbox = () => {
         >
           Todas
         </button>
+        
+
+
       </div>
+      
+      
       
       {error && <div className="alert alert-error text-sm">{error}</div>}
       {loading && <div className="skeleton h-20 w-full" />}
