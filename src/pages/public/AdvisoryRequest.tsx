@@ -72,14 +72,23 @@ const AdvisoryRequest = () => {
     setError('')
     setMessage('')
     try {
+      const selectedProgrammer = programmers.find(
+        (p) => p.id === form.programmerId,
+      )
+
       await addAdvisoryRequest({
         programmerId: form.programmerId,
+        programmerEmail: selectedProgrammer?.email,
+        programmerName: selectedProgrammer?.displayName,
         requesterName: form.requesterName,
         requesterEmail: form.requesterEmail,
         slot: { date: form.date, time: form.time },
         note: form.note,
       })
-      setMessage('Solicitud enviada. Recibirás respuesta del programador.')
+
+      setMessage(
+        'Solicitud enviada. El programador recibira un correo y te avisaremos por email cuando responda.',
+      )
       setForm(initialForm)
     } catch (err) {
       console.error('Error al enviar solicitud:', err)
@@ -89,6 +98,7 @@ const AdvisoryRequest = () => {
       setLoading(false)
     }
   }
+
 
   return (
     <div className="max-w-2xl">

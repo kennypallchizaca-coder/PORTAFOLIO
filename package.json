@@ -11,6 +11,7 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "@r0rri/react-galaxy-bg": "^2.0.0",
     "firebase": "^12.6.0",
     "framer-motion": "^12.23.25",

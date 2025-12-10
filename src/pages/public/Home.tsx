@@ -336,12 +336,6 @@ const Home = () => {
               >
                 Solicitar Asesoría
               </Link>
-              <Link
-                to="/mis-solicitudes"
-                className="btn btn-lg btn-outline px-8 shadow-lg hover:scale-105 transition-all duration-200"
-              >
-                Ver Mis Solicitudes
-              </Link>
             </div>
 
           </motion.div>

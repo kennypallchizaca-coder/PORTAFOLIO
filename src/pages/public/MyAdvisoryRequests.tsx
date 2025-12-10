@@ -81,15 +81,19 @@ const MyAdvisoryRequests = () => {
     setMessage('')
 
     try {
+      const selectedProgrammer = programmers.find((p) => p.id === form.programmerId)
+
       await addAdvisoryRequest({
         programmerId: form.programmerId,
+        programmerEmail: selectedProgrammer?.email,
+        programmerName: selectedProgrammer?.displayName,
         requesterName: form.requesterName,
         requesterEmail: form.requesterEmail,
         slot: { date: form.date, time: form.time },
         note: form.note,
       })
       
-      setMessage('¡Solicitud enviada exitosamente!')
+      setMessage('Solicitud enviada exitosamente. Te avisaremos por correo cuando el programador responda.')
       setForm({ ...initialForm, requesterEmail: email })
       setShowNewRequestForm(false)
       
@@ -102,6 +106,7 @@ const MyAdvisoryRequests = () => {
       setSubmitting(false)
     }
   }
+
 
   const getStatusBadge = (status: string) => {
     switch (status) {

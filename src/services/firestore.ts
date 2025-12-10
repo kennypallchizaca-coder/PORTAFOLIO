@@ -24,6 +24,10 @@ import {
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { Role } from './auth'
+import {
+  sendProgrammerAdvisoryEmail,
+  sendRequesterStatusEmail,
+} from './email'
 
 export const collections = {
   users: 'users',
@@ -68,6 +72,8 @@ export interface Project {
 
 export interface AdvisoryRequestInput {
   programmerId: string
+  programmerEmail?: string
+  programmerName?: string
   requesterName: string
   requesterEmail: string
   slot: { date: string; time: string }
@@ -79,6 +85,28 @@ export interface ScheduleSlot {
   from: string
   to: string
   available: boolean
+}
+
+const resolveProgrammerContact = async (
+  programmerId: string,
+  fallback?: { programmerEmail?: string; programmerName?: string },
+) => {
+  if (!programmerId) return fallback || {}
+
+  try {
+    const ref = doc(db, collections.users, programmerId)
+    const snap = await getDoc(ref)
+    if (!snap.exists()) return fallback || {}
+
+    const data = snap.data() as DocumentData
+    return {
+      programmerEmail: (data.email as string) || fallback?.programmerEmail,
+      programmerName: (data.displayName as string) || fallback?.programmerName,
+    }
+  } catch (error) {
+    console.error('No se pudo obtener el contacto del programador:', error)
+    return fallback || {}
+  }
 }
 
 /**
@@ -163,14 +191,36 @@ export const updateProject = async (projectId: string, data: Partial<Project>) =
     updatedAt: serverTimestamp(),
   })
 
-// Asesorías
-export const addAdvisoryRequest = async (data: AdvisoryRequestInput) =>
-  addDoc(collection(db, collections.advisories), {
+// Asesorias
+export const addAdvisoryRequest = async (data: AdvisoryRequestInput) => {
+  const contact = await resolveProgrammerContact(data.programmerId, {
+    programmerEmail: data.programmerEmail,
+    programmerName: data.programmerName,
+  })
+
+  const payload = {
     ...data,
+    programmerEmail: contact.programmerEmail,
+    programmerName: contact.programmerName,
     status: 'pendiente',
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
+  }
+
+  const docRef = await addDoc(collection(db, collections.advisories), payload)
+
+  await sendProgrammerAdvisoryEmail({
+    programmerEmail: payload.programmerEmail,
+    programmerName: payload.programmerName,
+    requesterName: data.requesterName,
+    requesterEmail: data.requesterEmail,
+    date: data.slot.date,
+    time: data.slot.time,
+    note: data.note,
   })
+
+  return docRef
+}
 
 export const listAdvisoriesByProgrammer = async (programmerId: string) => {
   const q = query(
@@ -185,12 +235,37 @@ export const updateAdvisoryStatus = async (
   advisoryId: string,
   status: 'pendiente' | 'aprobada' | 'rechazada',
   responseMessage?: string,
-) =>
-  updateDoc(doc(db, collections.advisories, advisoryId), {
+) => {
+  const ref = doc(db, collections.advisories, advisoryId)
+  const snap = await getDoc(ref)
+
+  if (!snap.exists()) {
+    throw new Error('La asesoria no existe')
+  }
+
+  const advisoryData = snap.data() as DocumentData
+
+  await updateDoc(ref, {
     status,
     responseMessage,
     updatedAt: serverTimestamp(),
   })
+
+  const contact = await resolveProgrammerContact(advisoryData.programmerId, {
+    programmerEmail: advisoryData.programmerEmail,
+    programmerName: advisoryData.programmerName,
+  })
+
+  await sendRequesterStatusEmail({
+    requesterEmail: advisoryData.requesterEmail as string | undefined,
+    requesterName: advisoryData.requesterName as string | undefined,
+    programmerName: contact.programmerName,
+    status,
+    date: advisoryData.slot?.date as string | undefined,
+    time: advisoryData.slot?.time as string | undefined,
+    responseMessage,
+  })
+}
 
 // Horarios
 export const upsertSchedule = async (programmerId: string, slots: ScheduleSlot[]) => {
