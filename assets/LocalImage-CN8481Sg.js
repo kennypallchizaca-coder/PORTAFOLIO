@@ -1,0 +1,1 @@
+import{r as c,j as g}from"./index-DuBGklgq.js";const i=({uid:e,type:s,fallback:t,alt:a="",className:m=""})=>{const[n,o]=c.useState(t||"");return c.useEffect(()=>{const p=s==="photo"?`photo_${e}`:`project_img_${e}`,r=localStorage.getItem(p);r?o(r):t&&o(t)},[e,s,t]),g.jsx("img",{src:n||"/default-avatar.png",alt:a,className:m})};export{i as L};
