@@ -94,7 +94,10 @@ const ProjectsPage = () => {
     setMessage('')
     setError('')
     try {
+      if (!user?.uid) throw new Error('Usuario no autenticado')
+
       const payload = {
+        ownerId: user.uid,
         title: form.title,
         description: form.description,
         category: form.category as 'academico' | 'laboral',
@@ -114,7 +117,6 @@ const ProjectsPage = () => {
         setMessage('Proyecto actualizado.')
       } else {
         // Crear nuevo proyecto y obtener su ID
-        if (!user?.uid) throw new Error('Usuario no autenticado')
         const docRef = await addProject(user.uid, payload)
         projectId = docRef.id
         setMessage('Proyecto creado.')
