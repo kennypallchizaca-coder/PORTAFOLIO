@@ -107,6 +107,7 @@ LEXISWARE integra React + Firebase + EmailJS para ofrecer una SPA de portafolios
 ## 10. Anexos
 
 - Link de nuestro video: https://youtu.be/HVLp-7pAvoE
+- Link en gh-pages: https://kennypallchizaca-coder.github.io/
 
 ![alt text](imagenes/image.png)
 
