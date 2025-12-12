@@ -1,11 +1,10 @@
 # INFORME DEL PROYECTO – PORTAFOLIO ADMINISTRATIVO
 
-## 1. Logo de la Carrera y del Proyecto
-*Incluir referencia o imagen del logo institucional y del equipo/proyecto en la carpeta `public/` o un enlace externo accesible.*
+![alt text](imagenes/image0.png)
 
 ## 2. Integrantes
 - **Alex Guaaman** – [https://github.com/kennypallchizaca-coder](https://github.com/kennypallchizaca-coder)
-- **Daniel Guanga** – Desarrollo colaborativo
+- **Daniel Guanga** – [https://github.com/Pangust-code](https://github.com/Pangust-code)
 - **Repositorio principal:** [LEXISWARE - Portafolio Profesional](https://github.com/kennypallchizaca-coder/PORTAFOLIO)
 
 ## 3. Tecnologías Utilizadas
@@ -52,10 +51,10 @@ LEXISWARE es una plataforma web académica para gestionar portafolios profesiona
 
 ## 7. Flujos Principales del Usuario
 1. **Ingreso público:** El visitante accede a la landing y navega por el directorio de programadores y proyectos sin autenticarse.
-2. **Autenticación y enrutamiento:** Un usuario inicia sesión con Google; el guard de rutas valida el rol y redirige al panel correspondiente (admin o programador).【F:src/App.tsx†L15-L84】
-3. **Creación de solicitud:** Un usuario general completa el formulario de asesoría; la solicitud se registra en Firestore con estado inicial `pending` y se notifica al programador por correo.【F:src/services/firestore.ts†L125-L172】【F:src/services/email.ts†L9-L71】
-4. **Atención de solicitud (programador):** El programador revisa su bandeja, actualiza el estado (aprobada/rechazada) y el solicitante recibe un correo con la respuesta detallada.【F:src/services/firestore.ts†L174-L217】【F:src/services/email.ts†L73-L106】
-5. **Administración:** El administrador gestiona roles, usuarios y proyectos desde el dashboard, manteniendo la información publicada y las solicitudes validadas.【F:src/App.tsx†L48-L71】
+2. **Autenticación y enrutamiento:** Un usuario inicia sesión con Google; el guard de rutas valida el rol y redirige al panel correspondiente (admin o programador).【F:src/App.tsx】
+3. **Creación de solicitud:** Un usuario general completa el formulario de asesoría; la solicitud se registra en Firestore con estado inicial `pending` y se notifica al programador por correo.【F:src/services/firestore.ts】【F:src/services/email.ts】
+4. **Atención de solicitud (programador):** El programador revisa su bandeja, actualiza el estado (aprobada/rechazada) y el solicitante recibe un correo con la respuesta detallada.【F:src/services/firestore.ts】【F:src/services/email.ts】
+5. **Administración:** El administrador gestiona roles, usuarios y proyectos desde el dashboard, manteniendo la información publicada y las solicitudes validadas.【F:src/App.tsx】
 
 ## 8. Fragmentos Técnicos Importantes
 ### Envío de correo con EmailJS
@@ -64,7 +63,7 @@ await emailjs.send(serviceId as string, templateId as string, params, {
   publicKey,
 })
 ```
-*Ubicación:* `src/services/email.ts` – envía notificaciones a programadores o solicitantes validando previamente la configuración.【F:src/services/email.ts†L21-L48】
+*Ubicación:* `src/services/email.ts` – envía notificaciones a programadores o solicitantes validando previamente la configuración.【F:src/services/email.ts】
 
 ### Registro de asesorías en Firebase
 ```ts
@@ -80,7 +79,7 @@ const payload = {
 
 const docRef = await addDoc(collection(db, collections.advisories), payload)
 ```
-*Ubicación:* `src/services/firestore.ts` – persiste la solicitud y agrega metadata temporal para trazabilidad.【F:src/services/firestore.ts†L142-L172】
+*Ubicación:* `src/services/firestore.ts` – persiste la solicitud y agrega metadata temporal para trazabilidad.【F:src/services/firestore.ts】
 
 ### Notificación de respuesta al solicitante
 ```ts
@@ -100,7 +99,25 @@ await sendRequesterStatusEmail({
   responseMessage,
 })
 ```
-*Ubicación:* `src/services/firestore.ts` – actualiza el estado de la asesoría y envía la notificación correspondiente.【F:src/services/firestore.ts†L188-L217】
+*Ubicación:* `src/services/firestore.ts` – actualiza el estado de la asesoría y envía la notificación correspondiente.【F:src/services/firestore.ts】
 
 ## 9. Conclusiones
 LEXISWARE integra React + Firebase + EmailJS para ofrecer una SPA de portafolios y asesorías con control de roles, persistencia en tiempo real y notificaciones automáticas. El proyecto consolida módulos públicos y privados bien delimitados; las mejoras futuras incluyen migrar almacenamiento multimedia a Firebase Storage, ampliar pruebas automatizadas e integrar calendarios o APIs adicionales para optimizar la coordinación de asesorías.
+
+## 10. Anexos
+
+- Link de nuestro video: https://youtu.be/HVLp-7pAvoE
+
+![alt text](imagenes/image.png)
+
+![alt text](imagenes/image-1.png)
+
+![alt text](imagenes/image-2.png)
+
+![alt text](imagenes/image-3.png)
+
+![alt text](imagenes/image-4.png)
+
+![alt text](imagenes/image-5.png)
+
+![alt text](imagenes/image-6.png)
